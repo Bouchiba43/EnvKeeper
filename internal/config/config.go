@@ -150,11 +150,16 @@ func (c *Config) applyRaw(raw *rawConfig) error {
 	return nil
 }
 
+// DefaultManifestPath returns the manifest location derived from a repo path.
+func DefaultManifestPath(repoPath string) string {
+	return filepath.Join(repoPath, ".env-sync-manifest.json")
+}
+
 // finalize resolves derived defaults (such as ManifestPath) and validates the
 // resulting configuration.
 func (c *Config) finalize() error {
 	if c.ManifestPath == "" {
-		c.ManifestPath = filepath.Join(c.RepoPath, ".env-sync-manifest.json")
+		c.ManifestPath = DefaultManifestPath(c.RepoPath)
 	}
 	return c.Validate()
 }
