@@ -1,0 +1,38 @@
+# env-sync configuration
+#
+# All fields are optional. Omitted values fall back to the defaults shown here.
+# Durations accept Go duration strings such as "30m", "1h", "6h".
+
+# Directory tree recursively scanned for .env* files.
+scan_root: /home/bouchiba/projects
+
+# Local Git repository where mirrored env files are written and committed.
+repo_path: /home/bouchiba/.env-sync/backup
+
+# How often pending changes are committed and pushed.
+sync_interval: 6h
+
+# How often scan_root is rescanned to discover new projects.
+rescan_interval: 1h
+
+# Branch and remote that changes are pushed to.
+git_branch: main
+git_remote: origin
+
+# Optional explicit manifest location.
+# Defaults to "<repo_path>/.env-sync-manifest.json" when left empty.
+manifest_path: ""
+
+# Directory names skipped during scanning.
+ignore_dirs:
+  - .git
+  - node_modules
+  - vendor
+  - dist
+  - build
+  - .next
+
+# Glob patterns matched against file names to identify env files.
+file_patterns:
+  - .env
+  - .env.*

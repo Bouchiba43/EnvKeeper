@@ -1,0 +1,11 @@
+# Build artifacts
+/env-sync
+/bin/
+/dist/
+
+# Local config that may contain machine-specific paths
+/config/config.yaml
+
+# Editor / OS noise
+*.swp
+.DS_Store
