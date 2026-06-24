@@ -55,12 +55,45 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full design.
 
 ## Requirements
 
-- Linux with systemd (tested on Fedora)
+- Linux with systemd (for the auto-start service)
 - Go 1.22+ and `git`
 - A **private** Git repository for the backups
 
 Follow the walkthrough below — it covers everything from an empty machine to a
 running background service.
+
+---
+
+## Platform support
+
+env-sync is **built and tested on Fedora 43.** It targets Linux first, but the
+core is portable Go (it cross-compiles cleanly to macOS and Windows).
+
+| Platform                 | Status         |
+| ------------------------ | -------------- |
+| Fedora 43                | Built & tested |
+| Other Linux with systemd | Supported      |
+| Linux without systemd    | Works manually |
+| macOS                    | Untested       |
+| Windows                  | Untested       |
+
+- **Fedora 43** is the reference platform — everything here is verified on it.
+- **Other Linux with systemd** (Ubuntu, Debian, Arch, …) uses the exact same
+  install path.
+- **Linux without systemd**: run `env-sync start` under your own process
+  manager (cron `@reboot`, supervisord, OpenRC, …).
+- **macOS / Windows**: the daemon and CLI compile and the watcher backend
+  exists (kqueue / `ReadDirectoryChangesW`), but they are untested and no
+  service file is shipped — on macOS use a launchd plist, on Windows a Scheduled
+  Task or service wrapper.
+
+What's Linux-specific is only the **service integration** (the `systemd --user`
+unit and `make install`/`make enable`). The binary itself — scanning, hashing,
+watching, and git sync — runs on any OS Go supports.
+
+> Filesystem watching is provided by [`fsnotify`](https://github.com/fsnotify/fsnotify),
+> which uses inotify on Linux, kqueue on macOS/BSD, and `ReadDirectoryChangesW`
+> on Windows.
 
 ---
 
