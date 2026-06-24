@@ -1,7 +1,12 @@
-# Build artifacts
+# Build artifacts / compiled binaries
 /env-sync
+**/env-sync
+!**/env-sync/
 /bin/
 /dist/
+*.exe
+*.test
+*.out
 
 # Local config that may contain machine-specific paths
 /config/config.yaml
