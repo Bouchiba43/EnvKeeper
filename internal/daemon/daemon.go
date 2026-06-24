@@ -19,12 +19,12 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/bouchiba/env-sync/internal/config"
-	"github.com/bouchiba/env-sync/internal/git"
-	"github.com/bouchiba/env-sync/internal/manifest"
-	"github.com/bouchiba/env-sync/internal/scanner"
-	"github.com/bouchiba/env-sync/internal/watcher"
-	"github.com/bouchiba/env-sync/pkg/logx"
+	"github.com/Bouchiba43/EnvKeeper/internal/config"
+	"github.com/Bouchiba43/EnvKeeper/internal/git"
+	"github.com/Bouchiba43/EnvKeeper/internal/manifest"
+	"github.com/Bouchiba43/EnvKeeper/internal/scanner"
+	"github.com/Bouchiba43/EnvKeeper/internal/watcher"
+	"github.com/Bouchiba43/EnvKeeper/pkg/logx"
 )
 
 // Daemon is the env-sync service engine.

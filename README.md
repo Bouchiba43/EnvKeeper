@@ -53,59 +53,130 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full design.
 
 ---
 
-## Installation
+## Requirements
 
-### From source
+- Linux with systemd (tested on Fedora)
+- Go 1.22+ and `git`
+- A **private** Git repository for the backups
 
-Requires Go 1.22+ and `git`.
-
-```bash
-git clone https://github.com/bouchiba/env-sync.git
-cd env-sync
-make build            # produces ./bin/env-sync
-```
-
-### Install for your user (binary + config + systemd unit)
-
-```bash
-make install          # installs to ~/.local/bin, ~/.config/env-sync
-```
-
-Make sure `~/.local/bin` is on your `PATH`.
+Follow the walkthrough below — it covers everything from an empty machine to a
+running background service.
 
 ---
 
-## Quick start
+## Setup walkthrough (5 minutes)
 
-1. **Create a backup repository** (a private remote is strongly recommended):
+This is the exact, start-to-finish setup. Run it once and env-sync takes care
+of itself from then on.
 
-   ```bash
-   mkdir -p ~/.env-sync/backup && cd ~/.env-sync/backup
-   git init -b main
-   git remote add origin git@github.com:you/env-backups.git   # optional but recommended
-   ```
+### 1. Create a **private** backup repository
 
-   > If you skip the remote, env-sync still keeps a **local** commit history as
-   > a backup — but it won't survive a disk wipe. Add a private remote.
+Your `.env` files contain secrets, so the backup repo **must be private**.
+Create an empty private repo on GitHub (e.g. `env-backup`), then:
 
-2. **Configure** (optional — defaults work out of the box):
+```bash
+mkdir -p ~/.env-sync/backup && cd ~/.env-sync/backup
+git init -b main
+git remote add origin git@github.com:YOUR_USERNAME/env-backup.git
+```
 
-   ```bash
-   cp config/config.example.yaml ~/.config/env-sync/config.yaml
-   $EDITOR ~/.config/env-sync/config.yaml
-   ```
+> ⚠️ Double-check the repo is private before the first push — env-sync will copy
+> real secret files into it. (On GitHub: repo → Settings → "Danger Zone" shows
+> visibility.) If you skip the remote entirely, env-sync still keeps **local**
+> commits, but those won't survive a disk wipe.
 
-3. **Run it**:
+### 2. Build and install
 
-   ```bash
-   env-sync start --config ~/.config/env-sync/config.yaml
-   ```
+```bash
+git clone https://github.com/Bouchiba43/EnvKeeper.git
+cd EnvKeeper
+make install
+```
 
-   Or run a one-off backup right now:
+This compiles the binary to `~/.local/bin/env-sync`, drops a default config at
+`~/.config/env-sync/config.yaml`, and installs the systemd unit. Make sure
+`~/.local/bin` is on your `PATH`.
 
-   ```bash
-   env-sync sync
-   ```
+### 3. Check the config
+
+The defaults already match a standard setup, so usually there's nothing to
+change. Open it only if your projects live somewhere other than `~/projects`:
+
+```bash
+cat ~/.config/env-sync/config.yaml
+```
+
+Key fields: `scan_root` (where your projects are) and `repo_path` (the backup
+repo you created in step 1). They default to `~/projects` and
+`~/.env-sync/backup`.
+
+### 4. Run the first backup
+
+```bash
+env-sync sync
+```
+
+You'll see it discover every `.env*` file, mirror them into the backup repo, and
+push. Example:
+
+```
+[INFO] Scanning projects...
+[INFO] Tracking my-project/.env
+[INFO] Tracking api/.env.production
+[INFO] Running git sync...
+[INFO] Committed and pushed: Sync env files - 2026-06-24 04:12 UTC
+```
+
+### 5. Turn it into a background service
+
+So it runs automatically on every login and keeps going after you log out:
+
+```bash
+systemctl --user enable --now env-sync.service
+loginctl enable-linger "$USER"
+```
+
+Verify it's running:
+
+```bash
+systemctl --user status env-sync     # should say "active (running)"
+journalctl --user -u env-sync -f     # live logs
+```
+
+That's it. From now on env-sync watches your env files, picks up new projects
+every hour, and pushes a backup every 6 hours whenever something changed.
+
+---
+
+## Everyday usage
+
+Once it's running as a service you rarely touch it, but these help:
+
+```bash
+env-sync status                      # list tracked files (metadata only, no secrets)
+env-sync sync                        # force a backup right now
+journalctl --user -u env-sync -f     # watch what it's doing
+systemctl --user restart env-sync    # restart after changing config
+systemctl --user stop env-sync       # pause backups
+```
+
+---
+
+## Restoring after a reinstall
+
+This is the whole point of the tool. After wiping/reinstalling your machine:
+
+```bash
+# 1. Get your backups back
+git clone git@github.com:YOUR_USERNAME/env-backup.git ~/.env-sync/backup
+
+# 2. Copy each file back to its project. The backup path mirrors the original
+#    layout, so it's a direct copy:
+cp ~/.env-sync/backup/my-project/.env        ~/projects/my-project/.env
+cp ~/.env-sync/backup/api/.env.production    ~/projects/api/.env.production
+```
+
+Then reinstall env-sync (steps 2 & 5 above) to resume backing up.
 
 ---
 

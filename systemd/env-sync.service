@@ -1,0 +1,45 @@
+# env-sync user service
+#
+# Install as a systemd --user unit so it starts automatically on login:
+#
+#   mkdir -p ~/.config/systemd/user
+#   cp systemd/env-sync.service ~/.config/systemd/user/
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now env-sync.service
+#
+# To keep it running after you log out (without an active session):
+#   loginctl enable-linger "$USER"
+#
+# View logs:
+#   journalctl --user -u env-sync -f
+
+[Unit]
+Description=env-sync - automatic .env file backup daemon
+Documentation=https://github.com/Bouchiba43/EnvKeeper
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+
+# Adjust the path if you installed the binary elsewhere (see `make install`).
+ExecStart=%h/.local/bin/env-sync start --config %h/.config/env-sync/config.yaml
+
+# Restart on failure so a transient error (e.g. network blip during push)
+# never permanently stops backups.
+Restart=on-failure
+RestartSec=30
+
+# The daemon only needs to read your projects and write its own backup repo.
+# These hardening options reduce its blast radius without breaking git/ssh.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+# Allow writing to the backup repo and the manifest under $HOME; tighten this
+# to specific paths if you prefer.
+ReadWritePaths=%h
+
+[Install]
+WantedBy=default.target

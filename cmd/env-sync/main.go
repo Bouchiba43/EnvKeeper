@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bouchiba/env-sync/internal/cli"
+	"github.com/Bouchiba43/EnvKeeper/internal/cli"
 )
 
 // version is overridden at build time via -ldflags "-X main.version=...".

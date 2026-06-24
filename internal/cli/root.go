@@ -6,9 +6,9 @@ package cli
 import (
 	"time"
 
-	"github.com/bouchiba/env-sync/internal/config"
-	"github.com/bouchiba/env-sync/internal/daemon"
-	"github.com/bouchiba/env-sync/pkg/logx"
+	"github.com/Bouchiba43/EnvKeeper/internal/config"
+	"github.com/Bouchiba43/EnvKeeper/internal/daemon"
+	"github.com/Bouchiba43/EnvKeeper/pkg/logx"
 	"github.com/spf13/cobra"
 )
 

@@ -1,4 +1,4 @@
-module github.com/bouchiba/env-sync
+module github.com/Bouchiba43/EnvKeeper
 
 go 1.22
 
